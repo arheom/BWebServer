@@ -1,20 +1,25 @@
 package org.bwebserver.http;
 
+import org.bwebserver.http.client.Capability;
 import org.bwebserver.http.protocol.HttpMethod;
 import org.bwebserver.http.protocol.HttpVersion;
+
+import java.net.Socket;
+import java.util.List;
 
 /**
  * Context of the current http request
  */
 public class HttpContext {
-    private boolean keepAlive = true;
-    private boolean closeConnection = false;
+    private Socket currentConnection;
+    private boolean persistentConnection = false;
     private HttpVersion httpVersion = null;
     private HttpMethod httpMethod = null;
     private String path = null;
 
     private HttpRequest httpRequest = null;
     private HttpResponse httpResponse = null;
+    private List<Capability> supportedCapabilities;
 
     HttpContext(){
 
@@ -26,34 +31,39 @@ public class HttpContext {
      * @param res - the current response of the context
      * @return httpcontext for the current request
      */
-    public static HttpContext create(HttpRequest req, HttpResponse res){
+    public static HttpContext create(HttpRequest req, HttpResponse res, Socket socket){
         HttpContext context = new HttpContext();
         context.httpMethod = req.getMethod();
         context.httpVersion = req.getVersion();
         context.path = req.getPath();
-        // extract context info from the headers
-        if (req.getHeaders().get("connection") != null){
-            context.keepAlive = req.getHeaders().get("connection").toString().equalsIgnoreCase("keep-alive");
-            context.closeConnection = req.getHeaders().get("connection").toString().equalsIgnoreCase("close");
-        }
         context.httpRequest = req;
         context.httpResponse = res;
+        context.supportedCapabilities = Capability.detectCapabilities(req);
+        context.currentConnection = socket;
         return context;
     }
 
-    boolean getCloseConnection() {
-        return closeConnection;
+    public Socket getCurrentConnection() {
+        return currentConnection;
+    }
+
+    public boolean getPersistentConnection() {
+        return persistentConnection;
+    }
+
+    public void setPersistentConnection(boolean value) {
+        persistentConnection = value;
     }
 
     public HttpResponse getHttpResponse() {
         return httpResponse;
     }
 
-    HttpMethod getHttpMethod() {
+    public HttpMethod getHttpMethod() {
         return httpMethod;
     }
 
-    HttpVersion getHttpVersion() {
+    public HttpVersion getHttpVersion() {
         return httpVersion;
     }
 
@@ -63,5 +73,9 @@ public class HttpContext {
 
     public HttpRequest getHttpRequest() {
         return httpRequest;
+    }
+
+    public List<Capability> getSupportedCapabilities() {
+        return supportedCapabilities;
     }
 }

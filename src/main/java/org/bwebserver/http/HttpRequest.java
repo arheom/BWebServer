@@ -7,14 +7,15 @@ import org.bwebserver.logging.LoggerService;
 
 import java.io.*;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
 
-public class HttpRequest {
+public class HttpRequest{
 
     private HttpMethod method;
     private String path;
     private HttpVersion version;
-    private Dictionary headers;
+    private HashMap<String, String> headers;
     private boolean isSupported = true;
     private byte[] body;
 
@@ -30,19 +31,19 @@ public class HttpRequest {
         return req;
     }
 
-    Dictionary getHeaders() {
+    public HashMap<String, String> getHeaders() {
         return headers;
     }
 
-    String getPath() {
+    public String getPath() {
         return path;
     }
 
-    HttpVersion getVersion() {
+    public HttpVersion getVersion() {
         return  version;
     }
 
-    HttpMethod getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 
@@ -59,7 +60,7 @@ public class HttpRequest {
      * @param in - InputStream from the socket
      */
     private void readRequest(InputStream in) throws IOException {
-        headers = new Hashtable();
+        headers = new HashMap<>();
 
         String line = readLine(in);
         // read the request main info (method, protocol, version)
@@ -91,7 +92,7 @@ public class HttpRequest {
 
         // if response body is sent, read it
         if (headers.get("content-length") != null){
-            int bodyLength = Integer.parseInt(headers.get("content-length").toString());
+            int bodyLength = Integer.parseInt(headers.get("content-length"));
             body = new byte[bodyLength];
             BufferedInputStream bin = new BufferedInputStream(in);
             bin.read(body);

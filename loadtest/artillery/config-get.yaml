@@ -1,0 +1,16 @@
+config:
+  target: 'http://localhost:8080/'
+  http:
+    pool: 100
+  phases:
+    - duration: 20
+      arrivalRate: 100
+  defaults:
+    headers:
+      Connection: 'keep-alive'
+scenarios:
+  - flow:
+    - get:
+        url: "/file1.txt"
+
+    

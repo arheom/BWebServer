@@ -1,0 +1,2 @@
+org.bwebserver.http.client.capabilities.CloseConnectionCapability
+org.bwebserver.http.client.capabilities.KeepAliveCapability

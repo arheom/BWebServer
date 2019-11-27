@@ -7,6 +7,7 @@ import org.bwebserver.control.ControlPlaneService;
 import org.bwebserver.heartbeat.HeartBeatProvider;
 import org.bwebserver.heartbeat.HeartBeatService;
 import org.bwebserver.http.HttpHandler;
+import org.bwebserver.http.client.Capability;
 import org.bwebserver.logging.LoggerProvider;
 import org.bwebserver.logging.LoggerService;
 
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;

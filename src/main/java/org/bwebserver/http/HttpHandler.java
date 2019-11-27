@@ -1,18 +1,17 @@
 package org.bwebserver.http;
 
-import static com.ea.async.Async.await;
 import static org.bwebserver.http.protocol.HttpMethod.*;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.bwebserver.config.ConfigProvider;
 import org.bwebserver.config.ConfigService;
-import org.bwebserver.content.ContentInfo;
 import org.bwebserver.content.ContentProvider;
 import org.bwebserver.content.ContentService;
 import org.bwebserver.control.ControlPlaneProvider;
 import org.bwebserver.control.ControlPlaneService;
 import org.bwebserver.heartbeat.HeartBeatProvider;
 import org.bwebserver.heartbeat.HeartBeatService;
+import org.bwebserver.http.client.Capability;
 import org.bwebserver.http.protocol.*;
 import org.bwebserver.logging.LoggerProvider;
 import org.bwebserver.logging.LoggerService;
@@ -52,8 +51,7 @@ public class HttpHandler implements Runnable {
             InputStream in = socket.getInputStream();
             OutputStream out = socket.getOutputStream();
 
-            boolean keepAlive = true;
-            while(keepAlive) {
+            do {
                 if (isServerTooBusy(in, out))
                     break;
                 // timer to measure the current request - statistical info only
@@ -65,22 +63,17 @@ public class HttpHandler implements Runnable {
                 HttpResponse httpResponse = HttpResponse.create(out);
 
                 // create context object for the current request
-                context = HttpContext.create(httpRequest, httpResponse);
+                context = HttpContext.create(httpRequest, httpResponse, socket);
                 context = control.decorateHttpContext(context);
 
+                Capability.applyBeforeResponseCapabilities(context);
                 // handle the current request
                 handleRequest(context);
+                Capability.applyAfterResponseCapabilities(context);
 
-                if (context.getCloseConnection()) {
-                    // if current request is marked to close the connection
-                    in.close();
-                    out.close();
-                    socket.close();
-                    keepAlive = false;
-                }
                 timerRequest.stop();
                 logger.LogInfo(String.format("Request for %s was handled in %d.", context.getPath(), timerRequest.getTime()));
-            }
+            } while (context.getPersistentConnection());
         } catch (Exception ex) {
             logger.LogError(String.format("Path: %s Error handling the request: %s", context.getPath(), ex.toString()));
             try {
