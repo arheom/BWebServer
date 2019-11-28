@@ -3,14 +3,14 @@ config:
   http:
     pool: 100
   phases:
-    - duration: 20
-      arrivalRate: 100
+    - duration: 10
+      arrivalRate: 500
   defaults:
     headers:
       Connection: 'keep-alive'
 scenarios:
   - flow:
     - get:
-        url: "/file1.txt"
+        url: "/tmp/filex.txt"
 
     

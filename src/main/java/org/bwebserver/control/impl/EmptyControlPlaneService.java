@@ -1,5 +1,6 @@
 package org.bwebserver.control.impl;
 
+import org.bwebserver.BWebServer;
 import org.bwebserver.content.ContentInfo;
 import org.bwebserver.control.ControlPlaneService;
 import org.bwebserver.http.HttpContext;
@@ -18,7 +19,7 @@ import java.util.concurrent.ExecutorService;
  */
 public class EmptyControlPlaneService implements ControlPlaneService {
 
-    private LoggerService logger = LoggerProvider.getInstance().serviceImpl();
+    private LoggerService logger = BWebServer.getLoggerService();
 
     @Override
     public ExecutorService decorateExecutorService(ExecutorService exec) {

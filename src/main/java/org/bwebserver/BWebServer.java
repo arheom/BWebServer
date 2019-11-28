@@ -1,6 +1,14 @@
 package org.bwebserver;
 
+import org.bwebserver.config.ConfigProvider;
+import org.bwebserver.config.ConfigService;
 import org.bwebserver.connection.ConnectionManager;
+import org.bwebserver.content.ContentProvider;
+import org.bwebserver.content.ContentService;
+import org.bwebserver.control.ControlPlaneProvider;
+import org.bwebserver.control.ControlPlaneService;
+import org.bwebserver.heartbeat.HeartBeatProvider;
+import org.bwebserver.heartbeat.HeartBeatService;
 import org.bwebserver.http.client.Capability;
 import org.bwebserver.http.client.CapabilityProvider;
 import org.bwebserver.logging.LoggerProvider;
@@ -13,9 +21,13 @@ public class BWebServer {
     private static BWebServer server = null;
 
     private boolean isRunning = false;
-    private LoggerService logger = LoggerProvider.getInstance().serviceImpl();
+    private static LoggerService logger = LoggerProvider.getInstance().serviceImpl();
     private static ArrayList<Capability> serverRegisteredCapabilities = CapabilityProvider.getInstance().getAllRegisteredCapabilities();
-    private ConnectionManager connectionManager = null;
+    private static ConfigService config = ConfigProvider.getInstance().serviceImpl();
+    private static HeartBeatService health = HeartBeatProvider.getInstance().serviceImpl();
+    private static ControlPlaneService control = ControlPlaneProvider.getInstance().serviceImpl();
+    private static ContentService contentService = ContentProvider.getInstance().serviceImpl();
+    private static ConnectionManager connectionManager = null;
 
     public BWebServer(){
 
@@ -42,9 +54,29 @@ public class BWebServer {
         return serverRegisteredCapabilities;
     }
 
+    public static ContentService getContentService() {
+        return contentService;
+    }
+
     private void start() throws IOException {
         isRunning = true;
         logger.LogInfo("BWebServer starting...");
         connectionManager.acceptConnections();
+    }
+
+    public static ControlPlaneService getControlPlaneService() {
+        return control;
+    }
+
+    public static HeartBeatService getHealthService() {
+        return health;
+    }
+
+    public static ConfigService getConfigService() {
+        return config;
+    }
+
+    public static LoggerService getLoggerService() {
+        return logger;
     }
 }

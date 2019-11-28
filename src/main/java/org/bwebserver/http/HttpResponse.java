@@ -1,6 +1,7 @@
 package org.bwebserver.http;
 
 import java.io.*;
+import java.net.Socket;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -49,14 +50,28 @@ public class HttpResponse {
 
     /**
      * Sends Service Unavailable status code to client when server is busy
-     * @param outStream - response stream
+     * @param socket - current connection
      * @throws IOException - when writing to the response stream
      */
-    static void sendBusy(OutputStream outStream) throws IOException {
+    public static void sendBusy(Socket socket) throws IOException {
         HttpResponse httpResponse = new HttpResponse();
-        httpResponse.out = new BufferedOutputStream(outStream);
+        httpResponse.out = new BufferedOutputStream(socket.getOutputStream());
         httpResponse.headers = new Hashtable();
         httpResponse.writeBody("", 503);
+        HttpContext.closeConnection(socket);
+    }
+
+    /**
+     * Sends error status to client
+     * @param socket - current connection
+     * @throws IOException - when writing to the response stream
+     */
+    public static void sendError(Socket socket, int code) throws IOException {
+        HttpResponse httpResponse = new HttpResponse();
+        httpResponse.out = new BufferedOutputStream(socket.getOutputStream());
+        httpResponse.headers = new Hashtable();
+        httpResponse.writeBody("", code);
+        HttpContext.closeConnection(socket);
     }
 
     public void addHeader(String name, String value){

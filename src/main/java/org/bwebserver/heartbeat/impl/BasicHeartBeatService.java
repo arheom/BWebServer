@@ -1,5 +1,6 @@
 package org.bwebserver.heartbeat.impl;
 
+import org.bwebserver.BWebServer;
 import org.bwebserver.config.ConfigProvider;
 import org.bwebserver.config.ConfigService;
 import org.bwebserver.heartbeat.HeartBeatService;
@@ -18,8 +19,8 @@ import java.lang.management.ManagementFactory;
  */
 public class BasicHeartBeatService implements HeartBeatService {
 
-    private ConfigService config = ConfigProvider.getInstance().serviceImpl();
-    private LoggerService logger = LoggerProvider.getInstance().serviceImpl();
+    private ConfigService config = BWebServer.getConfigService();
+    private LoggerService logger = BWebServer.getLoggerService();
 
     //very basic cache for CPU value. To be implemented as a debouncer.
     private static volatile double cpuCachedValue;
@@ -39,7 +40,7 @@ public class BasicHeartBeatService implements HeartBeatService {
             cpuValue = cpuCachedValue;
         } else {
             cpuValue = getProcessCpuLoad();
-            logger.LogWarning(String.format("CPU: %s", String.valueOf(cpuValue)));
+            logger.LogInfo(String.format("CPU: %s", String.valueOf(cpuValue)));
             cpuCachedTime = now;
         }
         return cpuValue <= config.getMaxCPUUsage();

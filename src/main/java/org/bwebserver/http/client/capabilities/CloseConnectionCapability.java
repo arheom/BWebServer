@@ -43,20 +43,6 @@ public class CloseConnectionCapability extends Capability {
 
     @Override
     public void afterResponse(HttpContext context){
-        try {
-            Socket socket = context.getCurrentConnection();
-            if (!socket.isClosed()) {
-                socket.shutdownOutput();
-                StopWatch timer = new StopWatch();
-                timer.start();
-                while ((socket.getInputStream().read() != -1) && (timer.getTime() < 100)) {
-                    // waiting for the socket to finish
-                }
-                timer.stop();
-                socket.close();
-            }
-        } catch (IOException e) {
-            logger.LogError(String.format("CloseConnectionCapability cannot close the connections: %s", e.toString()));
-        }
+        context.closeConnection();
     }
 }

@@ -1,5 +1,6 @@
 package org.bwebserver.http;
 
+import org.bwebserver.BWebServer;
 import org.bwebserver.http.protocol.HttpMethod;
 import org.bwebserver.http.protocol.HttpVersion;
 import org.bwebserver.logging.LoggerProvider;
@@ -19,7 +20,7 @@ public class HttpRequest{
     private boolean isSupported = true;
     private byte[] body;
 
-    private LoggerService logger = LoggerProvider.getInstance().serviceImpl();
+    private LoggerService logger = BWebServer.getLoggerService();
 
     private HttpRequest() {
 

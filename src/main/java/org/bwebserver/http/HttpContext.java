@@ -1,9 +1,14 @@
 package org.bwebserver.http;
 
+import org.apache.commons.lang3.time.StopWatch;
+import org.bwebserver.BWebServer;
 import org.bwebserver.http.client.Capability;
 import org.bwebserver.http.protocol.HttpMethod;
 import org.bwebserver.http.protocol.HttpVersion;
+import org.bwebserver.logging.LoggerProvider;
+import org.bwebserver.logging.LoggerService;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
 
@@ -20,6 +25,8 @@ public class HttpContext {
     private HttpRequest httpRequest = null;
     private HttpResponse httpResponse = null;
     private List<Capability> supportedCapabilities;
+
+    private static LoggerService logger = BWebServer.getLoggerService();
 
     HttpContext(){
 
@@ -41,6 +48,27 @@ public class HttpContext {
         context.supportedCapabilities = Capability.detectCapabilities(req);
         context.currentConnection = socket;
         return context;
+    }
+
+    public static void closeConnection(Socket socket){
+        try {
+            if (!socket.isClosed()) {
+                socket.shutdownOutput();
+                StopWatch timer = new StopWatch();
+                timer.start();
+                while ((socket.getInputStream().read() != -1) && (timer.getTime() < 100)) {
+                    // waiting for the socket to finish
+                }
+                timer.stop();
+                socket.close();
+            }
+        } catch (IOException e) {
+            logger.LogError(String.format("HttpContext cannot close the connections: %s", e.toString()));
+        }
+    }
+
+    public void closeConnection() {
+        HttpContext.closeConnection(currentConnection);
     }
 
     public Socket getCurrentConnection() {

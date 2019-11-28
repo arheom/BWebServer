@@ -18,7 +18,7 @@ public abstract class Capability{
     protected String headerName;
     protected boolean isEnabled;
     protected EnumSet<HttpVersion> supportedVersions;
-    protected LoggerService logger = LoggerProvider.getInstance().serviceImpl();
+    protected LoggerService logger = BWebServer.getLoggerService();
 
     public Capability() {
     }

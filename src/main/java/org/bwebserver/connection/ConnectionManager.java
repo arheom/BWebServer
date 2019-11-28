@@ -1,5 +1,6 @@
 package org.bwebserver.connection;
 
+import org.bwebserver.BWebServer;
 import org.bwebserver.config.ConfigProvider;
 import org.bwebserver.config.ConfigService;
 import org.bwebserver.control.ControlPlaneProvider;
@@ -30,10 +31,10 @@ public class ConnectionManager {
     private ServerSocketFactory serverSocketFactory = null;
     private ExecutorService exec = null;
 
-    private static LoggerService logger = LoggerProvider.getInstance().serviceImpl();
-    private static ConfigService config = ConfigProvider.getInstance().serviceImpl();
-    private static HeartBeatService health = HeartBeatProvider.getInstance().serviceImpl();
-    private static ControlPlaneService control = ControlPlaneProvider.getInstance().serviceImpl();
+    private static LoggerService logger = BWebServer.getLoggerService();
+    private static ConfigService config = BWebServer.getConfigService();
+    private static HeartBeatService health = BWebServer.getHealthService();
+    private static ControlPlaneService control = BWebServer.getControlPlaneService();
 
     private ConnectionManager() {
 

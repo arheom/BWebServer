@@ -3,6 +3,7 @@ package org.bwebserver.http;
 import static org.bwebserver.http.protocol.HttpMethod.*;
 
 import org.apache.commons.lang3.time.StopWatch;
+import org.bwebserver.BWebServer;
 import org.bwebserver.config.ConfigProvider;
 import org.bwebserver.config.ConfigService;
 import org.bwebserver.content.ContentProvider;
@@ -18,6 +19,7 @@ import org.bwebserver.logging.LoggerService;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.EnumSet;
 
 /**
@@ -27,11 +29,10 @@ public class HttpHandler implements Runnable {
     private Socket socket;
     private volatile int timeout;
 
-    private LoggerService logger = LoggerProvider.getInstance().serviceImpl();
-    private ContentService contentService = ContentProvider.getInstance().serviceImpl();
-    private ConfigService config = ConfigProvider.getInstance().serviceImpl();
-    private HeartBeatService health = HeartBeatProvider.getInstance().serviceImpl();
-    private ControlPlaneService control = ControlPlaneProvider.getInstance().serviceImpl();
+    private ConfigService config = BWebServer.getConfigService();
+    private LoggerService logger = BWebServer.getLoggerService();
+    private ControlPlaneService control = BWebServer.getControlPlaneService();
+    private HeartBeatService health = BWebServer.getHealthService();
 
     public HttpHandler(Socket socket) {
         this.socket = socket;
@@ -52,14 +53,23 @@ public class HttpHandler implements Runnable {
             OutputStream out = socket.getOutputStream();
 
             do {
-                if (isServerTooBusy(in, out))
+                if (isServerTooBusy(socket))
                     break;
                 // timer to measure the current request - statistical info only
                 StopWatch timerRequest = new StopWatch();
                 timerRequest.start();
 
                 // create request and response objects
-                HttpRequest httpRequest = HttpRequest.create(in);
+                HttpRequest httpRequest;
+                try {
+                    httpRequest = HttpRequest.create(in);
+                } catch (IOException e) {
+                    throw e;
+                } catch (Exception ex){
+                    logger.LogError(String.format("Path: %s Error processing the request information: %s", context.getPath(), ex.toString()));
+                    HttpResponse.sendError(socket, 400);
+                    throw ex;
+                }
                 HttpResponse httpResponse = HttpResponse.create(out);
 
                 // create context object for the current request
@@ -73,24 +83,28 @@ public class HttpHandler implements Runnable {
 
                 timerRequest.stop();
                 logger.LogInfo(String.format("Request for %s was handled in %d.", context.getPath(), timerRequest.getTime()));
-            } while (context.getPersistentConnection());
+            } while (context.getPersistentConnection() && !socket.isClosed());
+        } catch (SocketTimeoutException e) {
+            logger.LogInfo(String.format("Path: %s was closed due to timeout", context.getPath()));
+        } catch (IOException e) {
+            logger.LogInfo(String.format("Path: %s was closed due to IO error. %s", context.getPath(), e.getMessage()));
         } catch (Exception ex) {
-            logger.LogError(String.format("Path: %s Error handling the request: %s", context.getPath(), ex.toString()));
+            logger.LogError(String.format("Path: %s Error handling the request: %s", context.getPath(), ex.getMessage()));
             try {
-                socket.close();
+                if (!socket.isClosed()) {
+                    HttpResponse.sendError(socket, 500);
+                    HttpContext.closeConnection(socket);
+                }
             } catch (IOException e) {
                 logger.LogError(String.format("Path: %s Error closing the socket: %s", context.getPath(), ex.toString()));
             }
         }
     }
 
-    private boolean isServerTooBusy(InputStream in, OutputStream out) throws IOException {
+    private boolean isServerTooBusy(Socket socket) throws IOException {
         if (!health.IsHealthy()){
             logger.LogInfo("Server too busy");
-            HttpResponse.sendBusy(out);
-            in.close();
-            out.close();
-            socket.close();
+            HttpResponse.sendBusy(socket);
             return true;
         }
         return false;

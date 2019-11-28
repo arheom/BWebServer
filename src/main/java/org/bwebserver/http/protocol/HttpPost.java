@@ -1,19 +1,22 @@
 package org.bwebserver.http.protocol;
 
+import org.bwebserver.BWebServer;
 import org.bwebserver.content.ContentProvider;
 import org.bwebserver.content.ContentService;
 import org.bwebserver.control.ControlPlaneProvider;
 import org.bwebserver.control.ControlPlaneService;
 import org.bwebserver.http.HttpContext;
+import org.bwebserver.http.HttpResponse;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 
 import static com.ea.async.Async.await;
 
 
 public class HttpPost {
-    private ContentService contentService = ContentProvider.getInstance().serviceImpl();
-    private ControlPlaneService control = ControlPlaneProvider.getInstance().serviceImpl();
+    private ContentService contentService = BWebServer.getContentService();
 
     private HttpContext context;
 
@@ -26,12 +29,12 @@ public class HttpPost {
         return post;
     }
     public void execute() throws IOException {
-        boolean success = await(contentService.createContent(context.getPath(), context.getHttpRequest().getBody()));
-        if (!success) {
-            context.getHttpResponse().writeBody("", 404);
-        } else {
+        try {
+            await(contentService.createContent(context.getPath(), context.getHttpRequest().getBody()));
             context.getHttpResponse().addHeader("Content-Type", "text/html");
             context.getHttpResponse().writeBody("", 200);
+        } catch(FileAlreadyExistsException ex){
+            HttpResponse.sendError(context.getCurrentConnection(), 405);
         }
     }
 }
