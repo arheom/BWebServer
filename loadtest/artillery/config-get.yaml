@@ -4,7 +4,7 @@ config:
     pool: 100
   phases:
     - duration: 10
-      arrivalRate: 100
+      arrivalRate: 10
   defaults:
     headers:
       Connection: 'keep-alive'

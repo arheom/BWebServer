@@ -170,8 +170,9 @@ public class FileContentService implements ContentService {
             logger.LogWarning(String.format("Security Validation failed for path %s", path));
             return null;
         }
-
-        return getFile(path);
+        // for both windows and linux
+        String universalPath = path.replace("\\", "/");
+        return getFile(universalPath);
     }
 
     private void acquireReadLock(String path){
@@ -215,6 +216,6 @@ public class FileContentService implements ContentService {
     }
 
     private File getFile(String path){
-        return new File(String.format("%s\\%s", rootFolderPath, path));
+        return new File(String.format("%s%s%s", rootFolderPath, File.separator, path));
     }
 }
