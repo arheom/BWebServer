@@ -55,8 +55,8 @@ public class ConnectionManager {
         serverSocket.bind(new InetSocketAddress(config.getPort()));
 
         manager.serverSocket = serverSocket;
-        //manager.exec = Executors.newFixedThreadPool(config.getNThreads());
-        manager.exec = Executors.newCachedThreadPool();
+        manager.exec = Executors.newFixedThreadPool(config.getNThreads());
+        //manager.exec = Executors.newCachedThreadPool();
         manager.exec = control.decorateExecutorService(manager.exec);
         return manager;
     }
