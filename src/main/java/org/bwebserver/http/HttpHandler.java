@@ -86,6 +86,7 @@ public class HttpHandler implements Runnable {
             } while (context.getPersistentConnection() && !socket.isClosed());
         } catch (SocketTimeoutException e) {
             logger.LogInfo(String.format("Path: %s was closed due to timeout", context.getPath()));
+            HttpContext.silentCloseConnection(socket);
         } catch (IOException e) {
             logger.LogInfo(String.format("Path: %s was closed due to IO error. %s", context.getPath(), e.getMessage()));
         } catch (Exception ex) {
@@ -96,7 +97,7 @@ public class HttpHandler implements Runnable {
                     HttpContext.closeConnection(socket);
                 }
             } catch (IOException e) {
-                logger.LogError(String.format("Path: %s Error closing the socket: %s", context.getPath(), ex.toString()));
+                logger.LogError(String.format("Path: %s Error closing the socket: %s", context.getPath(), ex.getMessage()));
             }
         }
     }

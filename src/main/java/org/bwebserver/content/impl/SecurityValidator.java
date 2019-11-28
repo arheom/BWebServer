@@ -6,10 +6,7 @@ package org.bwebserver.content.impl;
  */
 class SecurityValidator {
     static boolean isUserInputSafe(String userUrl){
-        boolean isUrlSecure = !userUrl.equals("/") &&
-                !userUrl.equals("") &&
-                !userUrl.contains("/..") &&
-                !userUrl.contains("../");
+        boolean isUrlSecure = !userUrl.contains("/../");
         return isUrlSecure;
     }
 }

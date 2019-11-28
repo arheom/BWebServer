@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>BWebServer Viewer</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+</head>
+<body>
+  <div id="jstree">
+	<ul>
+		<li data-jstree='{"opened":true,"selected":true}'>{MainFolder}
+		  <ul>
+			{renderFiles}
+		  </ul>
+		</li>
+	</ul>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+  <script>
+  $(function () {
+    $('#jstree').jstree();
+    $('#jstree').on("changed.jstree", function (e, data) {
+      console.log(data.selected);
+    });
+  });
+  </script>
+</body>
+</html>

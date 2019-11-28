@@ -52,18 +52,30 @@ public class HttpContext {
 
     public static void closeConnection(Socket socket){
         try {
-            if (!socket.isClosed()) {
-                socket.shutdownOutput();
-                StopWatch timer = new StopWatch();
-                timer.start();
-                while ((socket.getInputStream().read() != -1) && (timer.getTime() < 100)) {
-                    // waiting for the socket to finish
-                }
-                timer.stop();
-                socket.close();
-            }
+            closeConnectionDirect(socket);
         } catch (IOException e) {
-            logger.LogError(String.format("HttpContext cannot close the connections: %s", e.toString()));
+            logger.LogError(String.format("HttpContext cannot close the connections: %s", e.getMessage()));
+        }
+    }
+
+    private static void closeConnectionDirect(Socket socket) throws IOException {
+        if (!socket.isClosed()) {
+            socket.shutdownOutput();
+            StopWatch timer = new StopWatch();
+            timer.start();
+            while ((socket.getInputStream().read() != -1) && (timer.getTime() < 100)) {
+                // waiting for the socket to finish
+            }
+            timer.stop();
+            socket.close();
+        }
+    }
+
+    public static void silentCloseConnection(Socket currentConnection) {
+        try{
+            HttpContext.closeConnectionDirect(currentConnection);
+        }catch(Exception ex){
+            // ignore any exception during the silent close
         }
     }
 

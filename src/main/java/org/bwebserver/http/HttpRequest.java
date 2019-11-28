@@ -7,6 +7,8 @@ import org.bwebserver.logging.LoggerProvider;
 import org.bwebserver.logging.LoggerService;
 
 import java.io.*;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -69,7 +71,7 @@ public class HttpRequest{
             // first line
             String[] parts = line.split(" ");
             String reqMethod = parts[0];
-            path = parts[1];
+            path = URLDecoder.decode(parts[1], StandardCharsets.UTF_8.toString());
             String reqVersion = parts[2];
             try {
                 method = HttpMethod.valueOf(reqMethod);

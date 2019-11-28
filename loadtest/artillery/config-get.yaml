@@ -12,6 +12,10 @@ scenarios:
   - flow:
     - get:
         url: "/tmp/filex.txt"
+    - get:
+        url: "/tmp"
+    - get:
+        url: "/"
     - put:
         url: "/tmp/filex.txt"
         body: "hello"
