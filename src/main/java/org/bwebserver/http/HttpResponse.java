@@ -1,5 +1,7 @@
 package org.bwebserver.http;
 
+import org.bwebserver.http.client.Policy;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.Dictionary;
@@ -37,6 +39,8 @@ public class HttpResponse {
         status.put(504, "Gateway Time-out");
     }
 
+    private int responseCode;
+
     private HttpResponse()  {
 
     }
@@ -57,7 +61,8 @@ public class HttpResponse {
         HttpResponse httpResponse = new HttpResponse();
         httpResponse.out = new BufferedOutputStream(socket.getOutputStream());
         httpResponse.headers = new Hashtable();
-        httpResponse.writeBody("", 503);
+        httpResponse.responseCode = 503;
+        httpResponse.writeBody("");
         HttpContext.closeConnection(socket);
     }
 
@@ -68,9 +73,11 @@ public class HttpResponse {
      */
     public static void sendError(Socket socket, int code) throws IOException {
         HttpResponse httpResponse = new HttpResponse();
+        httpResponse.responseCode = code;
         httpResponse.out = new BufferedOutputStream(socket.getOutputStream());
         httpResponse.headers = new Hashtable();
-        httpResponse.writeBody("", code);
+        Policy.applyBeforeErrorPolicies(httpResponse);
+        httpResponse.writeBody("");
         HttpContext.closeConnection(socket);
     }
 
@@ -78,34 +85,40 @@ public class HttpResponse {
         headers.put(name, value);
     }
 
-    public void writeBody(String text, int statusCode) throws IOException {
-        writeBody(text.getBytes(), statusCode);
+    public void writeBody(String text) throws IOException {
+        writeBody(text.getBytes());
     }
 
     /**
      * Sends body to client
      * @param body - body to be sent to client
-     * @param statusCode - HTTP status code
      */
-    public void writeBody(byte[] body, int statusCode) throws IOException {
+    public void writeBody(byte[] body) throws IOException {
         addHeader("Content-Length", String.valueOf(body.length));
-        sendHeaders(statusCode);
+        sendHeaders();
         out.write(body);
         out.flush();
     }
 
     /**
      * Sends header information to client
-     * @param statusCode status code sent to client
      */
-    private void sendHeaders(int statusCode) throws IOException {
+    private void sendHeaders() throws IOException {
         if (headers.get("Date") != null)
             headers.put("Date", String.format("%dns", System.nanoTime()));
         headers.put("Server", "BWebServerHTTP/1.0");
-        out.write(String.format("HTTP/1.1 %d %s\r\n", statusCode, status.get(statusCode)).getBytes());
+        out.write(String.format("HTTP/1.1 %d %s\r\n", responseCode, status.get(responseCode)).getBytes());
         for ( Object key : headers.keySet() ) {
             out.write(String.format("%s: %s\r\n", key, headers.get(key.toString())).getBytes());
         }
         out.write("\r\n".getBytes());
+    }
+
+    public int getResponseCode() {
+        return responseCode;
+    }
+
+    public void setResponseCode(int code) {
+        responseCode = code;
     }
 }

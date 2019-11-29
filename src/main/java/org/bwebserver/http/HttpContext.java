@@ -2,7 +2,9 @@ package org.bwebserver.http;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.bwebserver.BWebServer;
+import org.bwebserver.content.ContentInfo;
 import org.bwebserver.http.client.Capability;
+import org.bwebserver.http.client.Policy;
 import org.bwebserver.http.protocol.HttpMethod;
 import org.bwebserver.http.protocol.HttpVersion;
 import org.bwebserver.logging.LoggerProvider;
@@ -21,12 +23,14 @@ public class HttpContext {
     private HttpVersion httpVersion = null;
     private HttpMethod httpMethod = null;
     private String path = null;
+    private ContentInfo content = null;
 
     private HttpRequest httpRequest = null;
     private HttpResponse httpResponse = null;
     private List<Capability> supportedCapabilities;
 
     private static LoggerService logger = BWebServer.getLoggerService();
+    private List<Policy> enforcedPolicies;
 
     HttpContext(){
 
@@ -46,6 +50,7 @@ public class HttpContext {
         context.httpRequest = req;
         context.httpResponse = res;
         context.supportedCapabilities = Capability.detectCapabilities(req);
+        context.enforcedPolicies = Policy.detectPolicies(context);
         context.currentConnection = socket;
         return context;
     }
@@ -117,5 +122,16 @@ public class HttpContext {
 
     public List<Capability> getSupportedCapabilities() {
         return supportedCapabilities;
+    }
+
+    public List<Policy> getSEnforcedPolicies() {
+        return enforcedPolicies;
+    }
+
+    public void setContentInfo(ContentInfo file) {
+        content = file;
+    }
+    public ContentInfo getContentInfo() {
+        return content;
     }
 }

@@ -8,6 +8,7 @@ import org.bwebserver.control.ControlPlaneProvider;
 import org.bwebserver.control.ControlPlaneService;
 import org.bwebserver.http.HttpContext;
 import org.bwebserver.http.HttpResponse;
+import org.bwebserver.http.client.Policy;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -33,9 +34,10 @@ public class HttpGet {
         try {
             ContentInfo file = await(contentService.getContent(context.getPath()));
             file = control.decorateContentObject(file);
-            //TODO: implement the correct content type functionality
-            context.getHttpResponse().addHeader("Content-Type", "text/html");
-            context.getHttpResponse().writeBody(file.getContentBytes(), 200);
+            context.setContentInfo(file);
+            context.getHttpResponse().setResponseCode(200);
+            Policy.applyBeforeResponsePolicies(context);
+            context.getHttpResponse().writeBody(file.getContentBytes());
         } catch(FileNotFoundException ex){
             HttpResponse.sendError(context.getCurrentConnection(), 404);
         }

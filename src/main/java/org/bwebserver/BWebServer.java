@@ -11,6 +11,8 @@ import org.bwebserver.heartbeat.HeartBeatProvider;
 import org.bwebserver.heartbeat.HeartBeatService;
 import org.bwebserver.http.client.Capability;
 import org.bwebserver.http.client.CapabilityProvider;
+import org.bwebserver.http.client.Policy;
+import org.bwebserver.http.client.PolicyProvider;
 import org.bwebserver.logging.LoggerProvider;
 import org.bwebserver.logging.LoggerService;
 
@@ -23,6 +25,7 @@ public class BWebServer {
     private boolean isRunning = false;
     private static LoggerService logger = LoggerProvider.getInstance().serviceImpl();
     private static ArrayList<Capability> serverRegisteredCapabilities = CapabilityProvider.getInstance().getAllRegisteredCapabilities();
+    private static ArrayList<Policy> serverRegisteredPolicies = PolicyProvider.getInstance().getAllRegisteredPolicies();
     private static ConfigService config = ConfigProvider.getInstance().serviceImpl();
     private static HeartBeatService health = HeartBeatProvider.getInstance().serviceImpl();
     private static ControlPlaneService control = ControlPlaneProvider.getInstance().serviceImpl();
@@ -56,6 +59,10 @@ public class BWebServer {
 
     public static ContentService getContentService() {
         return contentService;
+    }
+
+    public static ArrayList<Policy> getServerRegisteredPolicies() {
+        return serverRegisteredPolicies;
     }
 
     private void start() throws IOException {

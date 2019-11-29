@@ -1,0 +1,3 @@
+org.bwebserver.http.client.policies.ContentLengthPolicy
+org.bwebserver.http.client.policies.ContentTypePolicy
+org.bwebserver.http.client.policies.DatePolicy

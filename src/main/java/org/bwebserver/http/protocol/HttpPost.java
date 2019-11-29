@@ -7,6 +7,7 @@ import org.bwebserver.control.ControlPlaneProvider;
 import org.bwebserver.control.ControlPlaneService;
 import org.bwebserver.http.HttpContext;
 import org.bwebserver.http.HttpResponse;
+import org.bwebserver.http.client.Policy;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -31,8 +32,9 @@ public class HttpPost {
     public void execute() throws IOException {
         try {
             await(contentService.createContent(context.getPath(), context.getHttpRequest().getBody()));
-            context.getHttpResponse().addHeader("Content-Type", "text/html");
-            context.getHttpResponse().writeBody("", 200);
+            context.getHttpResponse().setResponseCode(200);
+            Policy.applyBeforeResponsePolicies(context);
+            context.getHttpResponse().writeBody("");
         } catch(FileAlreadyExistsException ex){
             HttpResponse.sendError(context.getCurrentConnection(), 405);
         }

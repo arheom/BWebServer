@@ -113,7 +113,8 @@ public class HttpHandler implements Runnable {
 
     private void handleRequest(HttpContext context) throws IOException {
         if (!isCurrentRequestSupported(context)) {
-            context.getHttpResponse().writeBody("", 501);
+            context.getHttpResponse().setResponseCode(501);
+            context.getHttpResponse().writeBody("");
         } else{
             switch(context.getHttpMethod()){
                 case GET:
